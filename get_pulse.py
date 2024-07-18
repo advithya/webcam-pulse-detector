@@ -9,6 +9,55 @@ import datetime
 #from serial import Serial
 import socket
 import sys
+from lib.device import Camera
+from lib.processors_noopenmdao import findFaceGetPulse
+from lib.interface import plotXY, imshow, waitKey, destroyWindow
+from cv2 import moveWindow
+import argparse
+import numpy as np
+import datetime
+import socket
+import sys
+
+class getPulseApp(object):
+    """
+    Python application that finds a face in a webcam stream, then isolates the
+    forehead.
+
+    Then the average green-light intensity in the forehead region is gathered
+    over time, and the detected person's pulse is estimated.
+    """
+
+    def __init__(self, args):
+        # Imaging device - must be a connected camera (not an ip camera or mjpeg
+        # stream)
+        serial = args.serial
+        baud = args.baud
+        self.send_serial = False
+        self.send_udp = False
+        if serial:
+            self.send_serial = True
+            if not baud:
+                baud = 9600
+            else:
+                baud = int(baud)
+            self.serial = Serial(port=serial, baudrate=baud)
+
+        udp = args.udp
+        if udp:
+            self.send_udp = True
+            if ":" not in udp:
+                ip = udp
+                port = 5005
+            else:
+                ip, port = udp.split(":")
+                port = int(port)
+            self.udp = (ip, port)
+            self.sock = socket.socket(socket.AF_INET, # Internet
+                 socket.SOCK_DGRAM) # UDP
+
+        self.cameras = []
+        self.selected_cam
 
 class getPulseApp(object):
 
@@ -67,7 +116,7 @@ class getPulseApp(object):
 
         # Basically, everything that isn't communication
         # to the camera device or part of the GUI
-        self.processor = findFaceGetPulse(bpm_limits=[50, 160],
+        self.processor = findFaceGetPulse(bpm_limits=[60, 160],
                                           data_spike_limit=2500.,
                                           face_detector_smoothness=10.)
 
@@ -94,11 +143,11 @@ class getPulseApp(object):
         """
         Writes current data to a csv file
         """
-        fn = "Webcam-pulse" + str(datetime.datetime.now())
-        fn = fn.replace(":", "_").replace(".", "_")
+        fna = "Webcam-pulse" + str(datetime.datetime.now())
+        fna = fna.replace(":", "_").replace(".", "_")
         data = np.vstack((self.processor.times, self.processor.samples)).T
-        np.savetxt(fn + ".csv", data, delimiter=',')
-        print("Writing csv")
+        np.savetxt(fna + ".csv", data, delimiter=',')
+        print("Writing csv with bpm")
 
     def toggle_search(self):
         """

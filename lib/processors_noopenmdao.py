@@ -58,7 +58,7 @@ class findFaceGetPulse(object):
     def get_faces(self):
         return
 
-    def shift(self, detected):
+    def shift(self, detected): 
         x, y, w, h = detected
         center = np.array([x + 0.5 * w, y + 0.5 * h])
         shift = np.linalg.norm(center - self.last_center)
@@ -204,6 +204,12 @@ class findFaceGetPulse(object):
             pfreq = freqs[idx]
             self.freqs = pfreq
             self.fft = pruned
+
+            if pruned.size == 0:
+                # Handle the case where pruned is empty
+                print("No valid frequency components found.")
+                return
+
             idx2 = np.argmax(pruned)
 
             t = (np.sin(phase[idx2]) + 1.) / 2.
