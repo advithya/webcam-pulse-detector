@@ -8,60 +8,8 @@ import datetime
 #TODO: work on serial port comms, if anyone asks for it
 import socket
 import sys
-<<<<<<< HEAD
 import joblib
 import pandas as pd
-=======
-from lib.device import Camera
-from lib.processors_noopenmdao import findFaceGetPulse
-from lib.interface import plotXY, imshow, waitKey, destroyWindow
-from cv2 import moveWindow
-import argparse
-import numpy as np
-import datetime
-import socket
-import sys
-
-class getPulseApp(object):
-    """
-    Python application that finds a face in a webcam stream, then isolates the
-    forehead.
-
-    Then the average green-light intensity in the forehead region is gathered
-    over time, and the detected person's pulse is estimated.
-    """
-
-    def __init__(self, args):
-        # Imaging device - must be a connected camera (not an ip camera or mjpeg
-        # stream)
-        serial = args.serial
-        baud = args.baud
-        self.send_serial = False
-        self.send_udp = False
-        if serial:
-            self.send_serial = True
-            if not baud:
-                baud = 9600
-            else:
-                baud = int(baud)
-            self.serial = Serial(port=serial, baudrate=baud)
-
-        udp = args.udp
-        if udp:
-            self.send_udp = True
-            if ":" not in udp:
-                ip = udp
-                port = 5005
-            else:
-                ip, port = udp.split(":")
-                port = int(port)
-            self.udp = (ip, port)
-            self.sock = socket.socket(socket.AF_INET, # Internet
-                 socket.SOCK_DGRAM) # UDP
-
-        self.cameras = []
-        self.selected_cam
->>>>>>> 4ac76c0f9b5451f17cf0266d96bfae742810095c
 
 class getPulseApp(object):
     """
